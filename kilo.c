@@ -21,7 +21,7 @@ void enableRAWMode()
     /* ECHO=0010 -> then NOT is, and bitwise AND to the c_lflag
        echo mode off!!*/
 
-    raw.c_lflag &= ~(ECHO);
+    raw.c_lflag &= ~(ECHO|ICANON);
 
     //tscaflush -> when to apply the changes
     tcsetattr(STDIN_FILENO,TCSAFLUSH,&raw);
