@@ -1,21 +1,31 @@
+/*** includes ***/
+
 #include<errno.h>
 #include<stdio.h>
 #include<ctype.h>
 #include<termios.h>
 #include<unistd.h>
 #include<stdlib.h>
+
+/*** data ***/
+
 struct termios org_termios;
+
+/*** terminal ***/
 
 void die(const char *s)
 {
+    //perror checks the errno returned
     perror(s);
     exit(1);
 }
+
 void disableRAWMode()
 {
     if(tcsetattr(STDIN_FILENO,TCSAFLUSH,&org_termios)== -1)
         die("tcsetattr");
 }
+
 void enableRAWMode()
 {
     /* writing the terminal attribs to the structure -> tcgetattr
@@ -24,7 +34,9 @@ void enableRAWMode()
 
     if(tcgetattr(STDIN_FILENO,&org_termios)== -1)
         die("tcgetattr");
+
     //when program over, run disableraw() to go back to cooked
+
     atexit(disableRAWMode);
     struct termios raw=org_termios;
 
@@ -51,6 +63,9 @@ void enableRAWMode()
         die("tcsetattr");
 
 }
+
+/*** init ***/
+
 int main()
 {
     enableRAWMode();
