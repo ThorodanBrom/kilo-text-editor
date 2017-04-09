@@ -33,6 +33,10 @@ void enableRAWMode()
     raw.c_iflag &= ~(IXON|ICRNL|BRKINT|INPCK|ISTRIP);
     raw.c_cflag |= (CS8);
     raw.c_oflag &= ~(OPOST);
+    //VMIN -> min no of bytes before read() returns
+    //VTIME -> max time before ''''
+    raw.c_cc[VMIN]=0;
+    raw.c_cc[VTIME]=1;
 
     //tscaflush -> when to apply the changes
     tcsetattr(STDIN_FILENO,TCSAFLUSH,&raw);
@@ -41,11 +45,12 @@ void enableRAWMode()
 int main()
 {
     enableRAWMode();
-    char c;
     //read 1 byte from standard i/p to c
-    while(read(STDIN_FILENO,&c,1)==1 && c!='q')
+    while(1)
     {
         //checking if it is a control character
+        char c='\0';
+        read(STDIN_FILENO,&c,1);
         if(iscntrl(c))
         {
             printf("%d\r\n",c);
@@ -54,6 +59,8 @@ int main()
         {
             printf("%d ('%c')\r\n",c,c);
         }
+        if(c=='q')
+            break;
     }
     return 0;
 }
