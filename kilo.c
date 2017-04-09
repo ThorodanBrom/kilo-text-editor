@@ -21,9 +21,18 @@ void enableRAWMode()
     struct termios raw=org_termios;
 
     /* ECHO=0010 -> then NOT is, and bitwise AND to the c_lflag
-       echo mode off!!*/
+       echo mode off!!
+       turned off ctrl+z and ctrl+c with ISIG
+       turned off ctrl+s and ctrl+q with IXON
+       turned off ctrl+o, ctrl+v with IEXTEN
+       turned off ctrl+m with ICRNL -> makes it a carriage return
+       fixed \n to \r\n with OPOST
+       */
 
-    raw.c_lflag &= ~(ECHO|ICANON);
+    raw.c_lflag &= ~(ECHO|ICANON|IEXTEN|ISIG);
+    raw.c_iflag &= ~(IXON|ICRNL|BRKINT|INPCK|ISTRIP);
+    raw.c_cflag |= (CS8);
+    raw.c_oflag &= ~(OPOST);
 
     //tscaflush -> when to apply the changes
     tcsetattr(STDIN_FILENO,TCSAFLUSH,&raw);
@@ -39,11 +48,11 @@ int main()
         //checking if it is a control character
         if(iscntrl(c))
         {
-            printf("%d\n",c);
+            printf("%d\r\n",c);
         }
         else
         {
-            printf("%d ('%c')\n",c,c);
+            printf("%d ('%c')\r\n",c,c);
         }
     }
     return 0;
