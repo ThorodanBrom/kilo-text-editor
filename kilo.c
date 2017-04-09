@@ -1,3 +1,4 @@
+#include<errno.h>
 #include<stdio.h>
 #include<ctype.h>
 #include<termios.h>
@@ -5,9 +6,15 @@
 #include<stdlib.h>
 struct termios org_termios;
 
+void die(const char *s)
+{
+    perror(s);
+    exit(1);
+}
 void disableRAWMode()
 {
-    tcsetattr(STDIN_FILENO,TCSAFLUSH,&org_termios);
+    if(tcsetattr(STDIN_FILENO,TCSAFLUSH,&org_termios)== -1)
+        die("tcsetattr");
 }
 void enableRAWMode()
 {
@@ -15,7 +22,8 @@ void enableRAWMode()
      turn off echo mode
      save attribs -> tcsetattr */
 
-    tcgetattr(STDIN_FILENO,&org_termios);
+    if(tcgetattr(STDIN_FILENO,&org_termios)== -1)
+        die("tcgetattr");
     //when program over, run disableraw() to go back to cooked
     atexit(disableRAWMode);
     struct termios raw=org_termios;
@@ -39,7 +47,8 @@ void enableRAWMode()
     raw.c_cc[VTIME]=1;
 
     //tscaflush -> when to apply the changes
-    tcsetattr(STDIN_FILENO,TCSAFLUSH,&raw);
+    if(tcsetattr(STDIN_FILENO,TCSAFLUSH,&raw)== -1)
+        die("tcsetattr");
 
 }
 int main()
@@ -50,7 +59,8 @@ int main()
     {
         //checking if it is a control character
         char c='\0';
-        read(STDIN_FILENO,&c,1);
+        if(read(STDIN_FILENO,&c,1)== -1 && errno !=EAGAIN)
+            die("read");
         if(iscntrl(c))
         {
             printf("%d\r\n",c);
