@@ -1,3 +1,5 @@
+#include<stdio.h>
+#include<ctype.h>
 #include<termios.h>
 #include<unistd.h>
 #include<stdlib.h>
@@ -32,6 +34,17 @@ int main()
     enableRAWMode();
     char c;
     //read 1 byte from standard i/p to c
-    while(read(STDIN_FILENO,&c,1)==1 && c!='q');
+    while(read(STDIN_FILENO,&c,1)==1 && c!='q')
+    {
+        //checking if it is a control character
+        if(iscntrl(c))
+        {
+            printf("%d\n",c);
+        }
+        else
+        {
+            printf("%d ('%c')\n",c,c);
+        }
+    }
     return 0;
 }
