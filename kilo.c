@@ -19,6 +19,9 @@ struct termios org_termios;
 
 void die(const char *s)
 {
+    // in case an error is there, clear screen, reset cursor and print
+    write(STDOUT_FILENO,"\x1b[2J",4);
+    write(STDOUT_FILENO,"\x1b[H",3);
     //perror checks the errno returned
     perror(s);
     exit(1);
@@ -102,7 +105,9 @@ void editorProcessKeypress()
     char c=editorReadKey();
     switch(c)
     {
-        case CTRL_KEY('q'): exit(0);
+        case CTRL_KEY('q'): write(STDOUT_FILENO,"\x1b[2J",4);
+                            write(STDOUT_FILENO,"\x1b[H",3);
+                            exit(0);
         break;
     }
 }                    
