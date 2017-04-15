@@ -80,6 +80,21 @@ char editorReadKey()
     return c;
 }
 
+/*** output ***/
+
+/* writing 4 bytes to terminal
+   1st byte -> \x1b - escape char (27)
+   <esc>[ tells to perform some tex formatting
+   J -> erase in display -> argument is 2, means clear entire screen 
+   H -> set cursor at top of screen
+*/
+   
+void editorRefreshScreen()
+{
+    write(STDOUT_FILENO,"\x1b[2J",4);
+    write(STDOUT_FILENO,"\x1b[H",3);
+}    
+
 /*** input ***/
 
 void editorProcessKeypress()
@@ -97,9 +112,9 @@ void editorProcessKeypress()
 int main()
 {
     enableRAWMode();
-    //read 1 byte from standard i/p to c
     while(1)
     {
+        editorRefreshScreen();
         editorProcessKeypress();
     }
     return 0;
