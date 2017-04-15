@@ -85,6 +85,16 @@ char editorReadKey()
 
 /*** output ***/
 
+//draws each row of buffer of text edited
+void editorDrawRows()
+{
+    int y;
+    for(y=0;y<24;y++)//24 rows
+    {
+        write(STDOUT_FILENO,"~\r\n",3);
+    }
+}        
+
 /* writing 4 bytes to terminal
    1st byte -> \x1b - escape char (27)
    <esc>[ tells to perform some tex formatting
@@ -95,6 +105,8 @@ char editorReadKey()
 void editorRefreshScreen()
 {
     write(STDOUT_FILENO,"\x1b[2J",4);
+    write(STDOUT_FILENO,"\x1b[H",3);
+    editorDrawRows();
     write(STDOUT_FILENO,"\x1b[H",3);
 }    
 
