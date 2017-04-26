@@ -16,6 +16,8 @@
 struct editorConfig
 {
     struct termios org_termios;
+    int screenrows;
+    int screencols;
 };
 
 struct editorConfig E;
@@ -149,9 +151,16 @@ void editorProcessKeypress()
 
 /*** init ***/
 
+void initEditor()
+{
+    if(getWindowSize(&E.screenrows,&E.screencols)==-1)
+        die("getWindowSize");
+}    
+
 int main()
 {
     enableRAWMode();
+    initEditor();
     while(1)
     {
         editorRefreshScreen();
