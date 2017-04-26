@@ -4,6 +4,7 @@
 #include<stdio.h>
 #include<ctype.h>
 #include<termios.h>
+#include<sys/ioctl.h>
 #include<unistd.h>
 #include<stdlib.h>
 
@@ -12,9 +13,12 @@
 #define CTRL_KEY(k) ((k)&0x1f)
 
 /*** data ***/
+struct editorConfig
+{
+    struct termios org_termios;
+};
 
-struct termios org_termios;
-
+struct editorConfig E;
 /*** terminal ***/
 
 void die(const char *s)
@@ -27,9 +31,10 @@ void die(const char *s)
     exit(1);
 }
 
+
 void disableRAWMode()
 {
-    if(tcsetattr(STDIN_FILENO,TCSAFLUSH,&org_termios)== -1)
+    if(tcsetattr(STDIN_FILENO,TCSAFLUSH,&E.org_termios)== -1)
         die("tcsetattr");
 }
 
@@ -39,13 +44,13 @@ void enableRAWMode()
      turn off echo mode
      save attribs -> tcsetattr */
 
-    if(tcgetattr(STDIN_FILENO,&org_termios)== -1)
+    if(tcgetattr(STDIN_FILENO,&E.org_termios)== -1)
         die("tcgetattr");
 
     //when program over, run disableraw() to go back to cooked
 
     atexit(disableRAWMode);
-    struct termios raw=org_termios;
+    struct termios raw=E.org_termios;
 
     /* ECHO=0010 -> then NOT is, and bitwise AND to the c_lflag
        echo mode off!!
@@ -82,6 +87,24 @@ char editorReadKey()
     }
     return c;
 }
+
+/* winsize and TIOCGWINSZ from sys/ioctl.h
+   ioctl() places row and col num in winsize */
+int getWindowSize(int *rows, int *cols)
+{
+    struct winsize ws;
+    if(ioctl(STDOUT_FILENO,TIOCGWINSZ,&ws)==-1||ws.ws_col==0)
+    {
+        return -1;
+    }
+    else
+    {
+        *cols=ws.ws_col;
+        *rows=ws.ws_row;
+        return 0;
+    }
+}
+
 
 /*** output ***/
 
